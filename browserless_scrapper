@@ -14,3 +14,25 @@ import json
 import time
 import urllib.parse
 import random
+# --- Config ---
+MAX_IMAGES = 100
+SCROLL_PAUSE = 2.0
+DOWNLOAD_DELAY = 0.5
+BATCH_SIZE = 5  # Process 5 foods before restarting browser
+MAX_RETRIES = 3  # Retry failed items
+PAGE_LOAD_TIMEOUT = 30
+
+def load_food_data():
+    try:
+        with open('food_ranking_list_usa.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("ERROR: food_ranking_list_usa.json not found!")
+        return []
+    except json.JSONDecodeError:
+        print("ERROR: Invalid JSON format in food_ranking_list_usa.json")
+        return []
+
+def ask_start_index(food_data):
+    if not food_data:
+        return 0
