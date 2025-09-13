@@ -103,3 +103,43 @@ def create_driver():
         chrome_options.add_argument('--disable-plugins')
         chrome_options.add_argument('--disable-images')  # We'll enable images specifically for our search
         chrome_options.add_argument('--disable-javascript')  # Most image loading doesn't need JS
+        # User agent
+        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        
+        # Window size
+        chrome_options.add_argument('--window-size=1920,1080')
+        
+        # Optional: Run headless (uncomment to hide browser window)
+        # chrome_options.add_argument('--headless')
+        
+        # Create service (you may need to specify the path to chromedriver)
+        # service = Service('/path/to/chromedriver')  # Uncomment and modify if needed
+        service = Service()  # Uses chromedriver from PATH
+        
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
+        driver.implicitly_wait(10)
+        
+        return driver
+        
+    except Exception as e:
+        print(f"Failed to create Chrome driver: {e}")
+        print("Make sure you have Chrome and chromedriver installed.")
+        print("You can install chromedriver using: pip install chromedriver-autoinstaller")
+        return None
+
+def scroll_down(driver):
+    """Scroll down the page"""
+    try:
+        driver.execute_script("window.scrollBy(0, window.innerHeight);")
+        time.sleep(SCROLL_PAUSE)
+        return True
+    except Exception as e:
+        print(f"Error scrolling: {e}")
+        return False
+
+def get_image_urls_bing(driver, max_images):
+    """Get image URLs from Bing with better error handling"""
+    image_urls = set()
+    scroll_attempts = 0
+    max_scrolls = 8
