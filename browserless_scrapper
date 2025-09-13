@@ -143,3 +143,44 @@ def get_image_urls_bing(driver, max_images):
     image_urls = set()
     scroll_attempts = 0
     max_scrolls = 8
+   try:
+        while len(image_urls) < max_images and scroll_attempts < max_scrolls:
+            # Scroll to load more images
+            if not scroll_down(driver):
+                print("Failed to scroll, breaking")
+                break
+            scroll_attempts += 1
+            
+            # Get image elements
+            try:
+                # Wait for images to load
+                WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, 'img.mimg'))
+                )
+                
+                images = driver.find_elements(By.CSS_SELECTOR, 'img.mimg')
+                
+                for img in images:
+                    if len(image_urls) >= max_images:
+                        break
+                        
+                    try:
+                        src = img.get_attribute('src')
+                        if src and src.startswith('http') and src not in image_urls:
+                            image_urls.add(src)
+                            print(f"Found {len(image_urls)}/{max_images} images")
+                            
+                    except Exception:
+                        continue
+                        
+            except TimeoutException:
+                print("No more images found")
+                break
+            except Exception as e:
+                print(f"Error getting images: {e}")
+                break
+                
+    except Exception as e:
+        print(f"Error in get_image_urls_bing: {e}")
+    
+    return list(image_urls)
