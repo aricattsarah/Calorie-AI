@@ -280,7 +280,7 @@ def main():
     food_data = load_food_data()
     if not food_data:
         return
-    
+
     start_index = ask_start_index(food_data)
     
     print(f"\nStarting from index {start_index}")
