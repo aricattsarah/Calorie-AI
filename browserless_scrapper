@@ -298,3 +298,68 @@ def main():
             delay = random.randint(5, 15)
             print(f"\nWaiting {delay} seconds before next batch...")
             time.sleep(delay)
+ # Process the batch
+        batch_results = process_food_batch(food_data, batch_start, batch_end)
+        all_results.extend(batch_results)
+        
+        # Print batch summary
+        successful = sum(1 for r in batch_results if r['success'])
+        total_downloads = sum(r['count'] for r in batch_results)
+        print(f"\nBatch {batch_start}-{batch_end-1} completed:")
+        print(f"  Successful: {successful}/{len(batch_results)}")
+        print(f"  Total downloads: {total_downloads}")
+    
+    # Final summary
+    print("\n" + "="*50)
+    print("FINAL SUMMARY")
+    print("="*50)
+    
+    successful_foods = sum(1 for r in all_results if r['success'])
+    total_downloads = sum(r['count'] for r in all_results)
+    
+    print(f"Foods processed successfully: {successful_foods}/{len(all_results)}")
+    print(f"Total images downloaded: {total_downloads}")
+    
+    # Show failed items
+    failed_items = [r['food'] for r in all_results if not r['success']]
+    if failed_items:
+        print(f"\nFailed items ({len(failed_items)}):")
+        for item in failed_items[:10]:  # Show first 10
+            print(f"  - {item}")
+        if len(failed_items) > 10:
+            print(f"  ... and {len(failed_items) - 10} more")
+
+if __name__ == "__main__":
+    print("Food Image Scraper with Selenium")
+    print("=" * 40)
+    print("Features:")
+    print("- Selenium WebDriver for better control")
+    print("- Batch processing with browser restart")
+    print("- Optimized Chrome settings")
+    print("- Better error handling")
+    print("- Progress tracking")
+    print()
+    
+    # Check if chromedriver is available
+    try:
+        test_driver = create_driver()
+        if test_driver:
+            test_driver.quit()
+            print("✓ Chrome WebDriver is available")
+        else:
+            print("✗ Chrome WebDriver setup failed")
+            exit(1)
+    except Exception as e:
+        print(f"✗ Chrome WebDriver test failed: {e}")
+        print("\nTo fix this:")
+        print("1. Install Chrome browser")
+        print("2. Install chromedriver: pip install chromedriver-autoinstaller")
+        print("3. Or download chromedriver manually and add to PATH")
+        exit(1)
+    
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\nStopped by user")
+    except Exception as e:
+        print(f"\nUnexpected error: {e}")
