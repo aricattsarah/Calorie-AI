@@ -231,3 +231,70 @@ def process_food_batch(food_data, start_idx, end_idx):
         for idx in range(start_idx, min(end_idx, len(food_data))):
             food_name = food_data[idx]['name']
             print(f"\n[{idx+1}/{len(food_data)}] Processing: {food_name}")
+            try:
+                # Search for images
+                image_urls = search_food_images_safe(driver, food_name, MAX_IMAGES)
+                
+                if not image_urls:
+                    print(f"No images found for {food_name}")
+                    batch_results.append({'food': food_name, 'success': False, 'count': 0})
+                    continue
+                
+                print(f"Found {len(image_urls)} images for {food_name}")
+                
+                # Download images
+                download_count = 0
+                for i, url in enumerate(image_urls):
+                    if download_image(f"imgs/{food_name}/", url, f"{i+1}.jpg"):
+                        download_count += 1
+                    
+                    # Small delay between downloads
+                    time.sleep(DOWNLOAD_DELAY)
+                
+                print(f"Downloaded {download_count}/{len(image_urls)} images for {food_name}")
+                batch_results.append({'food': food_name, 'success': True, 'count': download_count})
+                
+                # Brief pause between foods
+                time.sleep(1)
+                
+            except Exception as e:
+                print(f"Error processing {food_name}: {e}")
+                batch_results.append({'food': food_name, 'success': False, 'count': 0})
+    
+    except Exception as e:
+        print(f"Batch processing error: {e}")
+    
+    finally:
+        # Clean up browser connection
+        if driver:
+            try:
+                driver.quit()
+                print(f"Closed browser for batch {start_idx}-{end_idx}")
+            except:
+                pass
+    
+    return batch_results
+
+def main():
+    # Load food data
+    food_data = load_food_data()
+    if not food_data:
+        return
+    
+    start_index = ask_start_index(food_data)
+    
+    print(f"\nStarting from index {start_index}")
+    print(f"Total foods to process: {len(food_data) - start_index}")
+    print(f"Processing in batches of {BATCH_SIZE}")
+    
+    all_results = []
+    
+    # Process in batches
+    for batch_start in range(start_index, len(food_data), BATCH_SIZE):
+        batch_end = min(batch_start + BATCH_SIZE, len(food_data))
+        
+        # Add random delay between batches to avoid rate limiting
+        if batch_start > start_index:
+            delay = random.randint(5, 15)
+            print(f"\nWaiting {delay} seconds before next batch...")
+            time.sleep(delay)
