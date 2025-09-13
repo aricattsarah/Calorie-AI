@@ -184,3 +184,50 @@ def get_image_urls_bing(driver, max_images):
         print(f"Error in get_image_urls_bing: {e}")
     
     return list(image_urls)
+def search_food_images_safe(driver, food_name, max_images):
+    """Search for images with comprehensive error handling"""
+    try:
+        encoded_food = urllib.parse.quote(food_name)
+        search_url = f"https://www.bing.com/images/search?q={encoded_food}+food+recipe"
+        
+        print(f"Navigating to: {search_url}")
+        driver.get(search_url)
+        
+        # Wait for page to load
+        time.sleep(3)
+        
+        # Wait for images to appear
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, 'img.mimg'))
+            )
+        except TimeoutException:
+            print(f"No images found for {food_name} (timeout)")
+            return []
+        
+        # Get image URLs
+        image_urls = get_image_urls_bing(driver, max_images)
+        return image_urls
+        
+    except Exception as e:
+        print(f"Error searching for {food_name}: {e}")
+        return []
+
+def process_food_batch(food_data, start_idx, end_idx):
+    """Process a batch of foods with a fresh browser connection"""
+    driver = None
+    batch_results = []
+    
+    try:
+        print(f"\n=== Starting batch {start_idx}-{end_idx} ===")
+        
+        # Create browser driver
+        driver = create_driver()
+        if not driver:
+            print("Failed to create browser driver for this batch")
+            return batch_results
+        
+        # Process each food in the batch
+        for idx in range(start_idx, min(end_idx, len(food_data))):
+            food_name = food_data[idx]['name']
+            print(f"\n[{idx+1}/{len(food_data)}] Processing: {food_name}")
