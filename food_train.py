@@ -158,3 +158,39 @@ def train_epoch_advanced(model, train_loader, criterion, optimizer, device, scal
     epoch_time = time.time() - start_time
     
     return avg_loss, accuracy, epoch_time
+# --- Test Time Augmentation for Validation ---
+def validate_with_tta(model, val_loader, criterion, device, num_tta=3):
+    model.eval()
+    total_loss = 0
+    correct = 0
+    total = 0
+    
+    with torch.no_grad():
+        for images, labels in val_loader:
+            images, labels = images.to(device, non_blocking=True), labels.to(device, non_blocking=True)
+            
+            # Standard prediction
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            
+            # Test Time Augmentation for better accuracy
+            if num_tta > 1:
+                tta_outputs = []
+                for _ in range(num_tta):
+                    # Apply random augmentation
+                    augmented = torch.flip(images, dims=[3]) if torch.rand(1) > 0.5 else images
+                    tta_out = model(augmented)
+                    tta_outputs.append(tta_out)
+                
+                # Average predictions
+                outputs = torch.mean(torch.stack(tta_outputs), dim=0)
+            
+            total_loss += loss.item()
+            _, preds = torch.max(outputs, 1)
+            correct += (preds == labels).sum().item()
+            total += labels.size(0)
+    
+    accuracy = 100 * correct / total
+    avg_loss = total_loss / len(val_loader)
+    
+    return avg_loss, accuracy
