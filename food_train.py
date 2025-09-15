@@ -278,3 +278,74 @@ def plot_comprehensive_history(train_losses, val_losses, train_accuracies, val_a
     plt.tight_layout()
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.show()
+# --- Main High-Capacity Training ---
+def main():
+    print("🚀 INITIATING HIGH-CAPACITY TRAINING")
+    print("⚡ Target: ~300MB model, 8+ hours training, maximum accuracy")
+    print("=" * 70)
+    
+    optimize_performance()
+    result = check_hardware()
+    
+    if result[0] is None:
+        print("❌ GPU required for high-capacity training!")
+        return
+    
+    batch_size, model_type, use_gpu = result
+    
+    # HIGH-CAPACITY TRAINING PARAMETERS
+    data_dir = r"C:\Users\arjun\.vscode\Raghav AI\Raghav AI\Database\ImageScraper\imgs_new"
+    num_epochs = 150  # Much longer training
+    base_learning_rate = 0.001
+    weight_decay = 0.0001  # Lighter weight decay for high capacity
+    
+    device = torch.device("cuda")
+    print(f"Using device: {device}")
+    
+    # Aggressive data loading for speed
+    num_workers = min(8, psutil.cpu_count())
+    pin_memory = True
+    
+    # Advanced transforms
+    train_transform, val_transform = get_advanced_transforms()
+    
+    # Load datasets
+    print("📁 Loading datasets with advanced augmentation...")
+    train_dataset = datasets.ImageFolder(root=data_dir, transform=train_transform)
+    val_dataset = datasets.ImageFolder(root=data_dir, transform=val_transform)
+    
+    num_classes = len(train_dataset.classes)
+    print(f"🎯 Found {num_classes} classes: {train_dataset.classes}")
+    
+    # Split dataset
+    train_size = int(0.85 * len(train_dataset))  # More training data
+    val_size = len(train_dataset) - train_size
+    train_indices, val_indices = torch.utils.data.random_split(
+        range(len(train_dataset)), [train_size, val_size]
+    )
+    
+    train_subset = torch.utils.data.Subset(train_dataset, train_indices.indices)
+    val_subset = torch.utils.data.Subset(val_dataset, val_indices.indices)
+    
+    # High-performance data loaders
+    train_loader = DataLoader(
+        train_subset, batch_size=batch_size, shuffle=True, 
+        num_workers=num_workers, pin_memory=pin_memory,
+        persistent_workers=True, prefetch_factor=2
+    )
+    
+    val_loader = DataLoader(
+        val_subset, batch_size=batch_size, shuffle=False, 
+        num_workers=num_workers, pin_memory=pin_memory,
+        persistent_workers=True, prefetch_factor=2
+    )
+    
+    print(f"📊 Training samples: {len(train_subset)}")
+    print(f"📊 Validation samples: {len(val_subset)}")
+    print(f"📊 Batch size: {batch_size}")
+    print(f"📊 Workers: {num_workers}")
+    
+    # High-capacity model
+    print(f"🏗️  Building high-capacity model...")
+    model = HighCapacityFoodClassifier(num_classes, model_type)
+    model = model.to(device)
