@@ -349,3 +349,41 @@ def main():
     print(f"🏗️  Building high-capacity model...")
     model = HighCapacityFoodClassifier(num_classes, model_type)
     model = model.to(device)
+   # Model size calculation
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    model_size_mb = total_params * 4 / (1024 * 1024)  # Assuming float32
+    
+    print(f"🔢 Total parameters: {total_params:,}")
+    print(f"🔢 Trainable parameters: {trainable_params:,}")
+    print(f"🔢 Estimated model size: {model_size_mb:.1f} MB")
+    
+    # Advanced optimizer and loss
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)  # Label smoothing
+    optimizer = optim.AdamW(model.parameters(), lr=base_learning_rate, 
+                           weight_decay=weight_decay, betas=(0.9, 0.999))
+    
+    # Advanced scheduler
+    scheduler = get_advanced_scheduler(optimizer, train_loader, num_epochs)
+    
+    # Mixed precision
+    scaler = torch.cuda.amp.GradScaler()
+    
+    # Training history
+    train_losses = []
+    val_losses = []
+    train_accuracies = []
+    val_accuracies = []
+    lr_history = []
+    epoch_times = []
+    
+    print("\n🎯 STARTING HIGH-CAPACITY TRAINING")
+    print("=" * 70)
+    print(f"🎯 Target epochs: {num_epochs}")
+    print(f"🎯 Expected duration: ~8 hours")
+    print(f"🎯 Target model size: ~300MB")
+    print("=" * 70)
+    
+    start_time = time.time()
+    best_val_acc = 0.0
+    training_start = datetime.now()
