@@ -387,3 +387,66 @@ def main():
     start_time = time.time()
     best_val_acc = 0.0
     training_start = datetime.now()
+for epoch in range(num_epochs):
+        epoch_start = time.time()
+        current_lr = optimizer.param_groups[0]['lr']
+        lr_history.append(current_lr)
+        
+        print(f"\n🔄 Epoch [{epoch+1}/{num_epochs}] | LR: {current_lr:.8f}")
+        
+        # Training
+        train_loss, train_acc, train_time = train_epoch_advanced(
+            model, train_loader, criterion, optimizer, device, scaler, epoch
+        )
+        
+        # Validation with TTA
+        val_loss, val_acc = validate_with_tta(model, val_loader, criterion, device, num_tta=3)
+        
+        # Store metrics
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        train_accuracies.append(train_acc)
+        val_accuracies.append(val_acc)
+        
+        epoch_time = time.time() - epoch_start
+        epoch_times.append(epoch_time)
+        
+        # Progress update
+        elapsed_hours = (time.time() - start_time) / 3600
+        eta_hours = (elapsed_hours / (epoch + 1)) * (num_epochs - epoch - 1)
+        
+        print(f"📈 Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}%")
+        print(f"📈 Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%")
+        print(f"⏱️  Epoch time: {epoch_time:.2f}s | Elapsed: {elapsed_hours:.2f}h | ETA: {eta_hours:.2f}h")
+        
+        # Step scheduler
+        scheduler.step()
+        
+        # Save best model
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'best_val_acc': best_val_acc,
+                'train_acc': train_acc,
+                'val_acc': val_acc
+            }, 'best_high_capacity_model.pth')
+            print(f"🏆 NEW BEST MODEL! Val Acc: {val_acc:.2f}%")
+        
+        # Checkpoint every 20 epochs
+        if (epoch + 1) % 20 == 0:
+            checkpoint_path = f'checkpoint_epoch_{epoch+1}.pth'
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'scheduler_state_dict': scheduler.state_dict(),
+                'train_losses': train_losses,
+                'val_losses': val_losses,
+                'train_accuracies': train_accuracies,
+                'val_accuracies': val_accuracies,
+                'lr_history': lr_history
+            }, checkpoint_path)
+            print(f"💾 Checkpoint saved: {checkpoint_path}")
