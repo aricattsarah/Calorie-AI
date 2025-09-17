@@ -450,3 +450,62 @@ for epoch in range(num_epochs):
                 'lr_history': lr_history
             }, checkpoint_path)
             print(f"💾 Checkpoint saved: {checkpoint_path}")
+# Memory cleanup
+        torch.cuda.empty_cache()
+        gc.collect()
+    
+    # Training complete
+    total_time = time.time() - start_time
+    
+    print("\n" + "=" * 70)
+    print("🎉 HIGH-CAPACITY TRAINING COMPLETE!")
+    print("=" * 70)
+    print(f"🏆 Best validation accuracy: {best_val_acc:.2f}%")
+    print(f"🏆 Final validation accuracy: {val_accuracies[-1]:.2f}%")
+    print(f"⏱️  Total training time: {total_time/3600:.2f} hours")
+    print(f"📊 Final model size: ~{model_size_mb:.1f} MB")
+    
+    # Save final model
+    final_model_path = "high_capacity_food_classifier.pth"
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'model_type': model_type,
+        'num_classes': num_classes,
+        'class_names': train_dataset.classes,
+        'best_val_acc': best_val_acc,
+        'training_time_hours': total_time/3600,
+        'model_size_mb': model_size_mb,
+        'final_val_acc': val_accuracies[-1]
+    }, final_model_path)
+    
+    print(f"💾 Final model saved: {final_model_path}")
+    
+    # Generate comprehensive plots
+    print("📊 Generating comprehensive training analysis...")
+    plot_comprehensive_history(train_losses, val_losses, train_accuracies, 
+                              val_accuracies, lr_history, epoch_times)
+    
+    # Save training log
+    training_log = {
+        'training_duration_hours': total_time/3600,
+        'best_val_accuracy': best_val_acc,
+        'final_val_accuracy': val_accuracies[-1],
+        'model_size_mb': model_size_mb,
+        'total_parameters': total_params,
+        'trainable_parameters': trainable_params,
+        'epochs_completed': len(train_losses),
+        'model_type': model_type,
+        'batch_size': batch_size,
+        'num_classes': num_classes,
+        'training_start': training_start.isoformat(),
+        'training_end': datetime.now().isoformat()
+    }
+    
+    with open('high_capacity_training_log.json', 'w') as f:
+        json.dump(training_log, f, indent=2)
+    
+    print("✅ Training log saved: high_capacity_training_log.json")
+    print(f"🎯 MISSION ACCOMPLISHED: {best_val_acc:.2f}% accuracy in {total_time/3600:.2f} hours!")
+
+if __name__ == "__main__":
+    main()
