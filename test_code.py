@@ -85,3 +85,112 @@ class FoodClassifierGUI:
         
         if os.path.exists(self.default_model_path):
             self.load_model_async(self.default_model_path)
+    def setup_ui(self):
+        main_frame = ttk.Frame(self.root, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=1)
+        
+        title_label = ttk.Label(main_frame, text="🍔 AI Food Classifier", 
+                               font=('Arial', 24, 'bold'))
+        title_label.grid(row=0, column=0, columnspan=3, pady=(0, 20))
+        
+        model_frame = ttk.LabelFrame(main_frame, text="Model Configuration", padding="10")
+        model_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        model_frame.columnconfigure(1, weight=1)
+        
+        ttk.Label(model_frame, text="Model Path:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+        self.model_path_var = tk.StringVar(value=self.default_model_path)
+        self.model_path_entry = ttk.Entry(model_frame, textvariable=self.model_path_var, width=60)
+        self.model_path_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 10))
+        
+        ttk.Button(model_frame, text="Browse", command=self.browse_model).grid(row=0, column=2)
+        ttk.Button(model_frame, text="Load Model", command=self.load_model_button).grid(row=0, column=3, padx=(10, 0))
+        
+        config_frame = ttk.Frame(model_frame)
+        config_frame.grid(row=2, column=0, columnspan=4, sticky=(tk.W, tk.E), pady=(10, 0))
+        
+        ttk.Label(config_frame, text="Num Classes:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+        self.num_classes_var = tk.StringVar(value="1052")
+        self.num_classes_entry = ttk.Entry(config_frame, textvariable=self.num_classes_var, width=10)
+        self.num_classes_entry.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        
+        ttk.Label(config_frame, text="Model Type:").grid(row=0, column=2, sticky=tk.W, padx=(0, 10))
+        self.model_type_var = tk.StringVar(value="efficientnet_b3")
+        self.model_type_combo = ttk.Combobox(config_frame, textvariable=self.model_type_var, 
+                                           values=["efficientnet_b0", "efficientnet_b1", "efficientnet_b2", 
+                                                  "efficientnet_b3", "efficientnet_b4"],
+                                           state="readonly", width=15)
+        self.model_type_combo.grid(row=0, column=3, sticky=tk.W)
+        
+        ttk.Label(config_frame, text="Class Names File:").grid(row=1, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self.class_names_path_var = tk.StringVar()
+        self.class_names_entry = ttk.Entry(config_frame, textvariable=self.class_names_path_var, width=30)
+        self.class_names_entry.grid(row=1, column=1, columnspan=2, sticky=(tk.W, tk.E), padx=(0, 10), pady=(10, 0))
+        
+        ttk.Button(config_frame, text="Browse", command=self.browse_class_names).grid(row=1, column=3, pady=(10, 0))
+        
+        self.model_status_var = tk.StringVar(value="Model not loaded")
+        self.model_status_label = ttk.Label(model_frame, textvariable=self.model_status_var, 
+                                          foreground="red")
+        self.model_status_label.grid(row=3, column=0, columnspan=4, pady=(10, 0))
+        
+        image_frame = ttk.LabelFrame(main_frame, text="Image Analysis", padding="10")
+        image_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        image_frame.columnconfigure(0, weight=1)
+        image_frame.columnconfigure(2, weight=1)
+        image_frame.rowconfigure(1, weight=1)
+        
+        upload_frame = ttk.Frame(image_frame)
+        upload_frame.grid(row=0, column=0, columnspan=3, pady=(0, 10))
+        
+        ttk.Button(upload_frame, text="📁 Upload Image", command=self.upload_image,
+                  style='Accent.TButton').pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.analyze_button = ttk.Button(upload_frame, text="🔍 Analyze Food", 
+                                       command=self.analyze_food, state='disabled',
+                                       style='Accent.TButton')
+        self.analyze_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(upload_frame, text="🗑️ Clear", command=self.clear_results).pack(side=tk.LEFT)
+        
+        content_frame = ttk.Frame(image_frame)
+        content_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S))
+        content_frame.columnconfigure(0, weight=1)
+        content_frame.columnconfigure(1, weight=1)
+        content_frame.rowconfigure(0, weight=1)
+        
+        image_display_frame = ttk.LabelFrame(content_frame, text="Image Preview", padding="10")
+        image_display_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        image_display_frame.columnconfigure(0, weight=1)
+        image_display_frame.rowconfigure(0, weight=1)
+        
+        self.image_label = ttk.Label(image_display_frame, text="No image selected", 
+                                   background='white', relief='sunken')
+        self.image_label.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        results_frame = ttk.LabelFrame(content_frame, text="Analysis Results", padding="10")
+        results_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+        results_frame.columnconfigure(0, weight=1)
+        results_frame.rowconfigure(0, weight=1)
+        
+        self.results_text = tk.Text(results_frame, height=15, width=40, wrap=tk.WORD,
+                                   font=('Consolas', 10))
+        scrollbar = ttk.Scrollbar(results_frame, orient=tk.VERTICAL, command=self.results_text.yview)
+        self.results_text.configure(yscrollcommand=scrollbar.set)
+        
+        self.results_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        self.progress = ttk.Progressbar(main_frame, mode='indeterminate')
+        self.progress.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        self.status_var = tk.StringVar(value="Ready")
+        status_bar = ttk.Label(main_frame, textvariable=self.status_var, 
+                             relief=tk.SUNKEN, anchor=tk.W)
+        status_bar.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E))
+        
+        style = ttk.Style()
+        style.configure('Accent.TButton', font=('Arial', 10, 'bold'))
