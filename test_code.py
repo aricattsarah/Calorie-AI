@@ -194,3 +194,26 @@ class FoodClassifierGUI:
         
         style = ttk.Style()
         style.configure('Accent.TButton', font=('Arial', 10, 'bold'))
+    def setup_transforms(self):
+        self.transform = transforms.Compose([
+            transforms.Resize(256 + 32),
+            transforms.CenterCrop(256),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+    
+    def browse_model(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Model File",
+            filetypes=[("PyTorch Models", "*.pth"), ("All Files", "*.*")]
+        )
+        if file_path:
+            self.model_path_var.set(file_path)
+    
+    def browse_class_names(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Class Names File",
+            filetypes=[("Text Files", "*.txt"), ("JSON Files", "*.json"), ("All Files", "*.*")]
+        )
+        if file_path:
+            self.class_names_path_var.set(file_path)
