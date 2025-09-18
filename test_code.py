@@ -217,3 +217,84 @@ class FoodClassifierGUI:
         )
         if file_path:
             self.class_names_path_var.set(file_path)
+    def load_class_names_from_file(self, file_path):
+        try:
+            if file_path.endswith('.json'):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        return data
+                    elif isinstance(data, dict):
+                        if 'class_names' in data:
+                            return data['class_names']
+                        elif 'classes' in data:
+                            return data['classes']
+                        else:
+                            return [data[str(i)] for i in range(len(data))]
+            else:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    return [line.strip() for line in f.readlines() if line.strip()]
+        except Exception as e:
+            print(f"Error loading class names from file: {e}")
+            return None
+    
+    def load_model_button(self):
+        model_path = self.model_path_var.get()
+        if not model_path:
+            messagebox.showerror("Error", "Please select a model file")
+            return
+        
+        if not os.path.exists(model_path):
+            messagebox.showerror("Error", "Model file not found")
+            return
+        
+        self.load_model_async(model_path)
+    
+    def load_model_async(self, model_path):
+        self.model_status_var.set("Loading model...")
+        self.model_status_label.configure(foreground="orange")
+        self.progress.start()
+        
+        thread = threading.Thread(target=self.load_model_thread, args=(model_path,))
+        thread.daemon = True
+        thread.start()
+        
+        self.root.after(100, self.check_model_loading)
+    
+    def load_model_thread(self, model_path):
+        try:
+            checkpoint = torch.load(model_path, map_location=self.device)
+            
+            num_classes = int(self.num_classes_var.get())
+            model_type = self.model_type_var.get()
+            
+            class_names = None
+            
+            class_names_path = self.class_names_path_var.get()
+            if class_names_path and os.path.exists(class_names_path):
+                class_names = self.load_class_names_from_file(class_names_path)
+            
+            if isinstance(checkpoint, dict):
+                saved_num_classes = checkpoint.get('num_classes')
+                saved_class_names = checkpoint.get('class_names')
+                saved_model_type = checkpoint.get('model_type', model_type)
+                
+                if saved_num_classes and self.num_classes_var.get() == "1052":
+                    num_classes = saved_num_classes
+                
+                if saved_model_type and self.model_type_var.get() == "efficientnet_b3":
+                    model_type = saved_model_type
+                
+                if class_names is None and saved_class_names:
+                    class_names = saved_class_names
+                
+                state_dict = checkpoint.get('model_state_dict', checkpoint)
+                
+                if 'model_state_dict' not in checkpoint:
+                    possible_keys = ['state_dict', 'model', 'net']
+                    for key in possible_keys:
+                        if key in checkpoint:
+                            state_dict = checkpoint[key]
+                            break
+                    else:
+                        state_dict = checkpoint
