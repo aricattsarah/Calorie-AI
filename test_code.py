@@ -334,3 +334,42 @@ class FoodClassifierGUI:
                     print(f"Warning: Loaded model with size mismatches: {e}")
                 else:
                     raise e
+            model = model.to(self.device)
+            model.eval()
+            
+            self.result_queue.put(('success', model, class_names, num_classes, model_type))
+            
+        except Exception as e:
+            self.result_queue.put(('error', str(e)))
+    
+    def infer_num_classes(self, state_dict):
+        try:
+            final_layer_patterns = [
+                'backbone.classifier.6.weight',
+                'backbone.classifier.6.bias',
+                'backbone.fc.weight',
+                'backbone.fc.bias',
+                'classifier.6.weight',
+                'classifier.6.bias',
+                'fc.weight',
+                'fc.bias'
+            ]
+            
+            for pattern in final_layer_patterns:
+                if pattern in state_dict:
+                    shape = state_dict[pattern].shape
+                    if 'weight' in pattern and len(shape) >= 2:
+                        return shape[0]
+                    elif 'bias' in pattern and len(shape) >= 1:
+                        return shape[0]
+            
+            for key in reversed(list(state_dict.keys())):
+                if 'weight' in key and len(state_dict[key].shape) >= 2:
+                    if any(word in key.lower() for word in ['classifier', 'fc', 'linear']):
+                        return state_dict[key].shape[0]
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error inferring num_classes: {e}")
+            return None
