@@ -298,3 +298,39 @@ class FoodClassifierGUI:
                             break
                     else:
                         state_dict = checkpoint
+           else:
+                state_dict = checkpoint
+            
+            if class_names is None:
+                class_names = [f"class_{i}" for i in range(num_classes)]
+            
+            if len(class_names) != num_classes:
+                print(f"Warning: Class names length ({len(class_names)}) doesn't match num_classes ({num_classes})")
+                if len(class_names) < num_classes:
+                    class_names.extend([f"class_{i}" for i in range(len(class_names), num_classes)])
+                else:
+                    class_names = class_names[:num_classes]
+            
+            if num_classes == 1052 and self.num_classes_var.get() == "1052":
+                inferred_classes = self.infer_num_classes(state_dict)
+                if inferred_classes:
+                    num_classes = inferred_classes
+                    if len(class_names) != num_classes:
+                        if class_names == [f"class_{i}" for i in range(len(class_names))]:
+                            class_names = [f"class_{i}" for i in range(num_classes)]
+                        else:
+                            if len(class_names) < num_classes:
+                                class_names.extend([f"class_{i}" for i in range(len(class_names), num_classes)])
+                            else:
+                                class_names = class_names[:num_classes]
+            
+            model = HighCapacityFoodClassifier(num_classes, model_type)
+            
+            try:
+                model.load_state_dict(state_dict, strict=True)
+            except RuntimeError as e:
+                if "size mismatch" in str(e):
+                    model.load_state_dict(state_dict, strict=False)
+                    print(f"Warning: Loaded model with size mismatches: {e}")
+                else:
+                    raise e
