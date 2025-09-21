@@ -373,3 +373,69 @@ class FoodClassifierGUI:
         except Exception as e:
             print(f"Error inferring num_classes: {e}")
             return None
+    def check_model_loading(self):
+        try:
+            result = self.result_queue.get_nowait()
+            self.progress.stop()
+            
+            if result[0] == 'success':
+                self.model = result[1]
+                self.class_names = result[2]
+                num_classes = result[3]
+                model_type = result[4]
+                self.model_loaded = True
+                
+                self.num_classes_var.set(str(num_classes))
+                self.model_type_var.set(model_type)
+                
+                self.model_status_var.set(f"Model loaded successfully! Classes: {len(self.class_names)}, Type: {model_type}")
+                self.model_status_label.configure(foreground="green")
+                self.status_var.set("Model loaded - Ready for analysis")
+                
+                if self.current_image_path:
+                    self.analyze_button.configure(state='normal')
+                    
+            else:
+                self.model_status_var.set(f"Failed to load model: {result[1]}")
+                self.model_status_label.configure(foreground="red")
+                self.status_var.set("Model loading failed")
+                
+        except queue.Empty:
+            self.root.after(100, self.check_model_loading)
+    
+    def upload_image(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Image",
+            filetypes=[
+                ("Image Files", "*.jpg *.jpeg *.png *.bmp *.gif *.tiff"),
+                ("All Files", "*.*")
+            ]
+        )
+        
+        if file_path:
+            try:
+                image = Image.open(file_path)
+                
+                if image.mode != 'RGB':
+                    image = image.convert('RGB')
+                
+                display_size = (300, 300)
+                image.thumbnail(display_size, Image.Resampling.LANCZOS)
+                
+                photo = ImageTk.PhotoImage(image)
+                
+                self.image_label.configure(image=photo, text="")
+                self.image_label.image = photo
+                
+                self.current_image_path = file_path
+                
+                if self.model_loaded:
+                    self.analyze_button.configure(state='normal')
+                
+                filename = os.path.basename(file_path)
+                self.status_var.set(f"Image loaded: {filename}")
+                
+                self.results_text.delete(1.0, tk.END)
+                
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load image: {str(e)}")
