@@ -439,3 +439,69 @@ class FoodClassifierGUI:
                 
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load image: {str(e)}")
+    def analyze_food(self):
+        if not self.model_loaded:
+            messagebox.showerror("Error", "Please load a model first")
+            return
+        
+        if not self.current_image_path:
+            messagebox.showerror("Error", "Please upload an image first")
+            return
+        
+        self.analyze_button.configure(state='disabled')
+        self.progress.start()
+        self.status_var.set("Analyzing image...")
+        
+        thread = threading.Thread(target=self.analyze_image_thread)
+        thread.daemon = True
+        thread.start()
+        
+        self.root.after(100, self.check_analysis_complete)
+    
+    def analyze_image_thread(self):
+        try:
+            image = Image.open(self.current_image_path)
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            input_tensor = self.transform(image).unsqueeze(0).to(self.device)
+            
+            with torch.no_grad():
+                outputs = self.model(input_tensor)
+                probabilities = F.softmax(outputs, dim=1)
+                
+                confidence, predicted_idx = torch.max(probabilities, 1)
+                predicted_class = self.class_names[predicted_idx.item()]
+                confidence_score = confidence.item()
+                
+                top5_probs, top5_indices = torch.topk(probabilities, min(5, len(self.class_names)))
+                top5_results = [
+                    (self.class_names[idx.item()], prob.item()) 
+                    for idx, prob in zip(top5_indices[0], top5_probs[0])
+                ]
+            
+            result = {
+                'predicted_class': predicted_class,
+                'confidence': confidence_score,
+                'top5': top5_results,
+                'image_path': self.current_image_path
+            }
+            
+            self.result_queue.put(('analysis_success', result))
+            
+        except Exception as e:
+            self.result_queue.put(('analysis_error', str(e)))
+    
+    def check_analysis_complete(self):
+        try:
+            result = self.result_queue.get_nowait()
+            self.progress.stop()
+            self.analyze_button.configure(state='normal')
+            
+            if result[0] == 'analysis_success':
+                self.display_results(result[1])
+                self.status_var.set("Analysis complete")
+            else:
+                self.results_text.delete(1.0, tk.END)
+                self.results_text.insert(tk.END, f"❌ Analysis failed: {result[1]}")
+                self.status_var.set("Analysis failed")
