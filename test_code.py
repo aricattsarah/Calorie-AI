@@ -505,3 +505,51 @@ class FoodClassifierGUI:
                 self.results_text.delete(1.0, tk.END)
                 self.results_text.insert(tk.END, f"❌ Analysis failed: {result[1]}")
                 self.status_var.set("Analysis failed")
+except queue.Empty:
+            self.root.after(100, self.check_analysis_complete)
+    
+    def display_results(self, result):
+        self.results_text.configure(state='normal')
+        self.results_text.delete(1.0, tk.END)
+        
+        self.results_text.insert(tk.END, "🍔 FOOD ANALYSIS RESULTS\n")
+        self.results_text.insert(tk.END, "=" * 30 + "\n\n")
+        
+        self.results_text.insert(tk.END, f"📸 Image: {os.path.basename(result['image_path'])}\n\n")
+        self.results_text.insert(tk.END, f"🎯 PREDICTED FOOD:\n")
+        self.results_text.insert(tk.END, f"   {result['predicted_class']}\n\n")
+        self.results_text.insert(tk.END, f"📊 Confidence: {result['confidence']*100:.2f}%\n\n")
+        
+        self.results_text.insert(tk.END, "🏆 TOP 5 PREDICTIONS:\n")
+        self.results_text.insert(tk.END, "-" * 25 + "\n")
+        
+        for i, (class_name, prob) in enumerate(result['top5']):
+            self.results_text.insert(tk.END, f"{i+1}. {class_name}\n")
+            self.results_text.insert(tk.END, f"   Confidence: {prob*100:.2f}%\n\n")
+        
+        self.results_text.insert(tk.END, "ℹ️ ANALYSIS INFO:\n")
+        self.results_text.insert(tk.END, f"Device: {self.device}\n")
+        self.results_text.insert(tk.END, f"Model: {getattr(self.model, 'model_type', 'Unknown')}\n")
+        self.results_text.insert(tk.END, f"Classes: {len(self.class_names)}\n")
+        self.results_text.insert(tk.END, f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        self.results_text.tag_configure('header', font=('Arial', 10, 'bold'))
+        self.results_text.tag_add('header', '1.0', '1.30')
+        
+        self.results_text.configure(state='disabled')
+
+    def clear_results(self):
+        self.current_image_path = None
+        self.image_label.configure(image=None, text="No image selected")
+        self.results_text.configure(state='normal')
+        self.results_text.delete(1.0, tk.END)
+        self.analyze_button.configure(state='disabled')
+        self.status_var.set("Ready")
+
+def main():
+    root = tk.Tk()
+    app = FoodClassifierGUI(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
