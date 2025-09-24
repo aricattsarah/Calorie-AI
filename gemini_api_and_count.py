@@ -63,3 +63,23 @@ class FoodAnalyzerGUI:
         upload_btn = ttk.Button(input_frame, text="Browse Image", command=self.browse_image)
         upload_btn.grid(row=1, column=1, sticky=tk.W)
         
+       # Image preview
+        self.image_label = ttk.Label(input_frame, text="No image selected", 
+                                    background="lightgray", relief="sunken")
+        self.image_label.grid(row=2, column=0, columnspan=2, pady=10, sticky=(tk.W, tk.E))
+        
+        # Analyze button
+        self.analyze_btn = ttk.Button(main_frame, text="🚀 Analyze Food", 
+                                     command=self.analyze_food, state="disabled")
+        self.analyze_btn.grid(row=3, column=0, columnspan=2, pady=10)
+        
+        # Progress bar
+        self.progress = ttk.Progressbar(main_frame, mode='indeterminate')
+        self.progress.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        # Results Section
+        results_frame = ttk.LabelFrame(main_frame, text="Results", padding="10")
+        results_frame.grid(row=5, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        results_frame.columnconfigure(0, weight=1)
+        results_frame.rowconfigure(1, weight=1)
+        main_frame.rowconfigure(5, weight=1)
