@@ -83,3 +83,30 @@ class FoodAnalyzerGUI:
         results_frame.columnconfigure(0, weight=1)
         results_frame.rowconfigure(1, weight=1)
         main_frame.rowconfigure(5, weight=1)
+       # Count display
+        self.count_frame = ttk.Frame(results_frame)
+        self.count_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        self.count_frame.columnconfigure(1, weight=1)
+        
+        ttk.Label(self.count_frame, text="Count:", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky=tk.W)
+        self.count_label = ttk.Label(self.count_frame, text="-", font=('Arial', 16, 'bold'), 
+                                    foreground="blue")
+        self.count_label.grid(row=0, column=1, sticky=tk.W, padx=(10, 0))
+        
+        # Results text area
+        self.results_text = scrolledtext.ScrolledText(results_frame, height=15, width=70)
+        self.results_text.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # Bind events
+        self.api_key.trace('w', self.check_inputs)
+        self.food_name.trace('w', self.check_inputs)
+        
+    def browse_image(self):
+        """Open file dialog to select image."""
+        file_path = filedialog.askopenfilename(
+            title="Select Food Image",
+            filetypes=[
+                ("Image files", "*.png *.jpg *.jpeg *.gif *.bmp"),
+                ("All files", "*.*")
+            ]
+        )
