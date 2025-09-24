@@ -110,3 +110,52 @@ class FoodAnalyzerGUI:
                 ("All files", "*.*")
             ]
         )
+        if file_path:
+            self.uploaded_image_path = file_path
+            self.load_image_preview(file_path)
+            self.check_inputs()
+    
+    def load_image_preview(self, file_path):
+        """Load and display image preview."""
+        try:
+            # Open and resize image for preview
+            image = Image.open(file_path)
+            image.thumbnail((300, 200), Image.Resampling.LANCZOS)
+            
+            # Convert to PhotoImage
+            photo = ImageTk.PhotoImage(image)
+            
+            # Update label
+            self.image_label.configure(image=photo, text="")
+            self.image_label.image = photo  # Keep a reference
+            
+            # Store original image
+            self.uploaded_image = Image.open(file_path)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load image: {str(e)}")
+    
+    def check_inputs(self, *args):
+        """Check if all required inputs are provided."""
+        can_analyze = (self.api_key.get().strip() and 
+                      self.food_name.get().strip() and 
+                      self.uploaded_image is not None)
+        
+        self.analyze_btn.configure(state="normal" if can_analyze else "disabled")
+    
+    def analyze_food(self):
+        """Analyze the uploaded food image."""
+        if not self.api_key.get().strip():
+            messagebox.showerror("Error", "Please enter your Gemini API key.")
+            return
+        
+        if not self.food_name.get().strip():
+            messagebox.showerror("Error", "Please enter the food item name.")
+            return
+        
+        if self.uploaded_image is None:
+            messagebox.showerror("Error", "Please upload an image.")
+            return
+        
+        # Start analysis in a separate thread
+        self.start_analysis()
