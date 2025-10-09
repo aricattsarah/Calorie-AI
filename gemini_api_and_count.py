@@ -182,3 +182,40 @@ class FoodAnalyzerGUI:
             prompt = f"""Analyze this image of {self.food_name.get().strip()} and provide:
 1. Count how many individual {self.food_name.get().strip()} items are visible in the image
 2. Estimate the total nutrition information for all items combined
+Please respond in this exact JSON format:
+{{
+  "count": number,
+  "countDescription": "brief description of what you see",
+  "nutrition": {{
+    "calories": number,
+    "protein": number,
+    "carbs": number,
+    "fat": number,
+    "fiber": number,
+    "sugar": number,
+    "sodium": number
+  }},
+  "notes": "any additional observations"
+}}
+
+Be as accurate as possible with the count and provide realistic nutrition estimates based on typical serving sizes."""
+            
+            # Generate response
+            response = model.generate_content([prompt, self.uploaded_image])
+            
+            # Extract JSON from response
+            response_text = response.text
+            json_start = response_text.find('{')
+            json_end = response_text.rfind('}') + 1
+            
+            if json_start != -1 and json_end != -1:
+                json_str = response_text[json_start:json_end]
+                result = json.loads(json_str)
+                
+                # Update GUI in main thread
+                self.root.after(0, self.display_results, result)
+            else:
+                raise ValueError("Could not extract JSON from response")
+                
+        except Exception as e:
+            self.root.after(0, self.show_error, f"Analysis failed: {str(e)}")
