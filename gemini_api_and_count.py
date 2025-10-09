@@ -219,3 +219,35 @@ Be as accurate as possible with the count and provide realistic nutrition estima
                 
         except Exception as e:
             self.root.after(0, self.show_error, f"Analysis failed: {str(e)}")
+def display_results(self, result):
+        """Display analysis results."""
+        self.progress.stop()
+        self.analyze_btn.configure(state="normal")
+        
+        # Update count
+        self.count_label.configure(text=str(result.get("count", "-")))
+        
+        # Clear and update results text
+        self.results_text.delete(1.0, tk.END)
+        
+        # Display results
+        self.results_text.insert(tk.END, "=== ANALYSIS RESULTS ===\n\n")
+        
+        # Count section
+        self.results_text.insert(tk.END, f"🔢 COUNT: {result.get('count', 'N/A')}\n")
+        self.results_text.insert(tk.END, f"📝 DESCRIPTION: {result.get('countDescription', 'N/A')}\n\n")
+        
+        # Nutrition section
+        self.results_text.insert(tk.END, "🥗 NUTRITION INFORMATION:\n")
+        self.results_text.insert(tk.END, "-" * 30 + "\n")
+        
+        nutrition = result.get("nutrition", {})
+        nutrition_items = [
+            ("Calories", "kcal"),
+            ("Protein", "g"),
+            ("Carbs", "g"),
+            ("Fat", "g"),
+            ("Fiber", "g"),
+            ("Sugar", "g"),
+            ("Sodium", "mg")
+        ]
