@@ -251,3 +251,16 @@ def display_results(self, result):
             ("Sugar", "g"),
             ("Sodium", "mg")
         ]
+for item, unit in nutrition_items:
+            key = item.lower()
+            value = nutrition.get(key, 0)
+            self.results_text.insert(tk.END, f"{item:10}: {value:6} {unit}\n")
+        
+        # Notes section
+        if result.get("notes"):
+            self.results_text.insert(tk.END, f"\n📝 NOTES:\n{result.get('notes')}\n")
+        
+        # Raw data section
+        self.results_text.insert(tk.END, "\n" + "="*50 + "\n")
+        self.results_text.insert(tk.END, "RAW DATA (JSON):\n")
+        self.results_text.insert(tk.END, json.dumps(result, indent=2))
