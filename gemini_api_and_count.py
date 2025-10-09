@@ -159,3 +159,26 @@ class FoodAnalyzerGUI:
         
         # Start analysis in a separate thread
         self.start_analysis()
+ def start_analysis(self):
+        """Start the analysis process."""
+        self.analyze_btn.configure(state="disabled")
+        self.progress.start()
+        self.results_text.delete(1.0, tk.END)
+        self.results_text.insert(tk.END, "Analyzing image...\n")
+        
+        # Run analysis in thread to prevent GUI freezing
+        thread = threading.Thread(target=self.run_analysis)
+        thread.daemon = True
+        thread.start()
+    
+    def run_analysis(self):
+        """Run the actual analysis."""
+        try:
+            # Configure Gemini API
+            genai.configure(api_key=self.api_key.get().strip())
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            # Create prompt
+            prompt = f"""Analyze this image of {self.food_name.get().strip()} and provide:
+1. Count how many individual {self.food_name.get().strip()} items are visible in the image
+2. Estimate the total nutrition information for all items combined
