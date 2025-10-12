@@ -264,3 +264,12 @@ for item, unit in nutrition_items:
         self.results_text.insert(tk.END, "\n" + "="*50 + "\n")
         self.results_text.insert(tk.END, "RAW DATA (JSON):\n")
         self.results_text.insert(tk.END, json.dumps(result, indent=2))
+    def show_error(self, error_message):
+        """Show error message."""
+        self.progress.stop()
+        self.analyze_btn.configure(state="normal")
+        
+        self.results_text.delete(1.0, tk.END)
+        self.results_text.insert(tk.END, f"❌ ERROR: {error_message}\n")
+        
+        messagebox.showerror("Analysis Error", error_message)
