@@ -273,3 +273,11 @@ for item, unit in nutrition_items:
         self.results_text.insert(tk.END, f"❌ ERROR: {error_message}\n")
         
         messagebox.showerror("Analysis Error", error_message)
+def main():
+    """Main function to run the GUI application."""
+    root = tk.Tk()
+    app = FoodAnalyzerGUI(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
