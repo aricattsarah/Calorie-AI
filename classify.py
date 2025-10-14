@@ -42,3 +42,20 @@ class HighCapacityFoodClassifier(nn.Module):
                 raise AttributeError("Backbone has no classifier/fc layer")
         except Exception as e:
             raise RuntimeError(f"Classifier build failed: {str(e)}")
+    def _build_classifier(self, in_features, num_classes):
+        return nn.Sequential(
+            nn.Dropout(0.3),
+            nn.Linear(in_features, 2048),
+            nn.ReLU(),
+            nn.BatchNorm1d(2048),
+            nn.Dropout(0.4),
+            nn.Linear(2048, 1024),
+            nn.ReLU(),
+            nn.BatchNorm1d(1024),
+            nn.Dropout(0.3),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Dropout(0.2),
+            nn.Linear(512, num_classes)
+        )
