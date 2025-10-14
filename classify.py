@@ -59,3 +59,27 @@ class HighCapacityFoodClassifier(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(512, num_classes)
         )
+    def forward(self, x):
+        return self.backbone(x)
+
+class FoodClassifierGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("🍔 Food Classifier - AI Image Analysis")
+        self.root.geometry("900x750")
+        self.root.configure(bg='#f0f0f0')
+        
+        self.model = None
+        self.class_names = []
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.current_image_path = None
+        self.transform = None
+        self.model_loaded = False
+        self.default_model_path = r"C:\Users\arjun\.vscode\Raghav AI\Raghav AI\AI-model\Calorie AI\high_capacity_food_classifier.pth"
+        self.result_queue = queue.Queue()
+        
+        self.setup_ui()
+        self.setup_transforms()
+        
+        if os.path.exists(self.default_model_path):
+            self.load_model_async(self.default_model_path)
