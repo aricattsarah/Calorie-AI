@@ -83,3 +83,23 @@ class FoodClassifierGUI:
         
         if os.path.exists(self.default_model_path):
             self.load_model_async(self.default_model_path)
+    def setup_ui(self):
+        main_frame = ttk.Frame(self.root, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=1)
+        
+        title_label = ttk.Label(main_frame, text="🍔 AI Food Classifier", 
+                               font=('Arial', 24, 'bold'))
+        title_label.grid(row=0, column=0, columnspan=3, pady=(0, 20))
+        
+        model_frame = ttk.LabelFrame(main_frame, text="Model Configuration", padding="10")
+        model_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        model_frame.columnconfigure(1, weight=1)
+        
+        ttk.Label(model_frame, text="Model Path:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+        self.model_path_var = tk.StringVar(value=self.default_model_path)
+        self.model_path_entry = ttk.Entry(model_frame, textvariable=self.model_path_var, width=60)
+        self.model_path_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 10))
