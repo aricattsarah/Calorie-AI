@@ -103,3 +103,13 @@ class FoodClassifierGUI:
         self.model_path_var = tk.StringVar(value=self.default_model_path)
         self.model_path_entry = ttk.Entry(model_frame, textvariable=self.model_path_var, width=60)
         self.model_path_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 10))
+        ttk.Button(model_frame, text="Browse", command=self.browse_model).grid(row=0, column=2)
+        ttk.Button(model_frame, text="Load Model", command=self.load_model_button).grid(row=0, column=3, padx=(10, 0))
+        
+        config_frame = ttk.Frame(model_frame)
+        config_frame.grid(row=2, column=0, columnspan=4, sticky=(tk.W, tk.E), pady=(10, 0))
+        
+        ttk.Label(config_frame, text="Num Classes:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+        self.num_classes_var = tk.StringVar(value="1052")
+        self.num_classes_entry = ttk.Entry(config_frame, textvariable=self.num_classes_var, width=10)
+        self.num_classes_entry.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
