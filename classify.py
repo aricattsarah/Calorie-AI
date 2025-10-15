@@ -113,3 +113,22 @@ class FoodClassifierGUI:
         self.num_classes_var = tk.StringVar(value="1052")
         self.num_classes_entry = ttk.Entry(config_frame, textvariable=self.num_classes_var, width=10)
         self.num_classes_entry.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+       ttk.Label(config_frame, text="Model Type:").grid(row=0, column=2, sticky=tk.W, padx=(0, 10))
+        self.model_type_var = tk.StringVar(value="efficientnet_b3")
+        self.model_type_combo = ttk.Combobox(config_frame, textvariable=self.model_type_var, 
+                                           values=["efficientnet_b0", "efficientnet_b1", "efficientnet_b2", 
+                                                  "efficientnet_b3", "efficientnet_b4"],
+                                           state="readonly", width=15)
+        self.model_type_combo.grid(row=0, column=3, sticky=tk.W)
+        
+        ttk.Label(config_frame, text="Class Names File:").grid(row=1, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self.class_names_path_var = tk.StringVar()
+        self.class_names_entry = ttk.Entry(config_frame, textvariable=self.class_names_path_var, width=30)
+        self.class_names_entry.grid(row=1, column=1, columnspan=2, sticky=(tk.W, tk.E), padx=(0, 10), pady=(10, 0))
+        
+        ttk.Button(config_frame, text="Browse", command=self.browse_class_names).grid(row=1, column=3, pady=(10, 0))
+        
+        self.model_status_var = tk.StringVar(value="Model not loaded")
+        self.model_status_label = ttk.Label(model_frame, textvariable=self.model_status_var, 
+                                          foreground="red")
+        self.model_status_label.grid(row=3, column=0, columnspan=4, pady=(10, 0))
