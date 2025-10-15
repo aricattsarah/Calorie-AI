@@ -138,3 +138,27 @@ class FoodClassifierGUI:
         self.model_status_label = ttk.Label(model_frame, textvariable=self.model_status_var, 
                                           foreground="red")
         self.model_status_label.grid(row=3, column=0, columnspan=4, pady=(10, 0))
+        image_frame = ttk.LabelFrame(main_frame, text="Image Analysis", padding="10")
+        image_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        image_frame.columnconfigure(0, weight=1)
+        image_frame.columnconfigure(2, weight=1)
+        image_frame.rowconfigure(1, weight=1)
+        
+        upload_frame = ttk.Frame(image_frame)
+        upload_frame.grid(row=0, column=0, columnspan=3, pady=(0, 10))
+        
+        ttk.Button(upload_frame, text="📁 Upload Image", command=self.upload_image,
+                  style='Accent.TButton').pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.analyze_button = ttk.Button(upload_frame, text="🔍 Analyze Food", 
+                                       command=self.analyze_food, state='disabled',
+                                       style='Accent.TButton')
+        self.analyze_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(upload_frame, text="🗑️ Clear", command=self.clear_results).pack(side=tk.LEFT)
+        
+        content_frame = ttk.Frame(image_frame)
+        content_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S))
+        content_frame.columnconfigure(0, weight=1)
+        content_frame.columnconfigure(1, weight=1)
+        content_frame.rowconfigure(0, weight=1)
