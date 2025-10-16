@@ -175,3 +175,21 @@ class FoodClassifierGUI:
         results_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
         results_frame.columnconfigure(0, weight=1)
         results_frame.rowconfigure(0, weight=1)
+        self.results_text = tk.Text(results_frame, height=15, width=40, wrap=tk.WORD,
+                                   font=('Consolas', 10))
+        scrollbar = ttk.Scrollbar(results_frame, orient=tk.VERTICAL, command=self.results_text.yview)
+        self.results_text.configure(yscrollcommand=scrollbar.set)
+        
+        self.results_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        self.progress = ttk.Progressbar(main_frame, mode='indeterminate')
+        self.progress.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        self.status_var = tk.StringVar(value="Ready")
+        status_bar = ttk.Label(main_frame, textvariable=self.status_var, 
+                             relief=tk.SUNKEN, anchor=tk.W)
+        status_bar.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E))
+        
+        style = ttk.Style()
+        style.configure('Accent.TButton', font=('Arial', 10, 'bold'))
