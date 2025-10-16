@@ -162,3 +162,16 @@ class FoodClassifierGUI:
         content_frame.columnconfigure(0, weight=1)
         content_frame.columnconfigure(1, weight=1)
         content_frame.rowconfigure(0, weight=1)
+        image_display_frame = ttk.LabelFrame(content_frame, text="Image Preview", padding="10")
+        image_display_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        image_display_frame.columnconfigure(0, weight=1)
+        image_display_frame.rowconfigure(0, weight=1)
+        
+        self.image_label = ttk.Label(image_display_frame, text="No image selected", 
+                                   background='white', relief='sunken')
+        self.image_label.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        results_frame = ttk.LabelFrame(content_frame, text="Analysis Results", padding="10")
+        results_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+        results_frame.columnconfigure(0, weight=1)
+        results_frame.rowconfigure(0, weight=1)
