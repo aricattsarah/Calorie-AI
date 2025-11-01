@@ -200,3 +200,39 @@ class FoodClassifierGUI:
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
+    def browse_model(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Model File",
+            filetypes=[("PyTorch Models", "*.pth"), ("All Files", "*.*")]
+        )
+        if file_path:
+            self.model_path_var.set(file_path)
+    
+    def browse_class_names(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Class Names File",
+            filetypes=[("Text Files", "*.txt"), ("JSON Files", "*.json"), ("All Files", "*.*")]
+        )
+        if file_path:
+            self.class_names_path_var.set(file_path)
+    
+    def load_class_names_from_file(self, file_path):
+        try:
+            if file_path.endswith('.json'):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        return data
+                    elif isinstance(data, dict):
+                        if 'class_names' in data:
+                            return data['class_names']
+                        elif 'classes' in data:
+                            return data['classes']
+                        else:
+                            return [data[str(i)] for i in range(len(data))]
+            else:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    return [line.strip() for line in f.readlines() if line.strip()]
+        except Exception as e:
+            print(f"Error loading class names from file: {e}")
+            return None
