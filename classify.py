@@ -236,3 +236,25 @@ class FoodClassifierGUI:
         except Exception as e:
             print(f"Error loading class names from file: {e}")
             return None
+    def load_model_button(self):
+        model_path = self.model_path_var.get()
+        if not model_path:
+            messagebox.showerror("Error", "Please select a model file")
+            return
+        
+        if not os.path.exists(model_path):
+            messagebox.showerror("Error", "Model file not found")
+            return
+        
+        self.load_model_async(model_path)
+    
+    def load_model_async(self, model_path):
+        self.model_status_var.set("Loading model...")
+        self.model_status_label.configure(foreground="orange")
+        self.progress.start()
+        
+        thread = threading.Thread(target=self.load_model_thread, args=(model_path,))
+        thread.daemon = True
+        thread.start()
+        
+        self.root.after(100, self.check_model_loading)
