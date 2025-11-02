@@ -258,3 +258,20 @@ class FoodClassifierGUI:
         thread.start()
         
         self.root.after(100, self.check_model_loading)
+    def load_model_thread(self, model_path):
+        try:
+            checkpoint = torch.load(model_path, map_location=self.device)
+            
+            num_classes = int(self.num_classes_var.get())
+            model_type = self.model_type_var.get()
+            
+            class_names = None
+            
+            class_names_path = self.class_names_path_var.get()
+            if class_names_path and os.path.exists(class_names_path):
+                class_names = self.load_class_names_from_file(class_names_path)
+            
+            if isinstance(checkpoint, dict):
+                saved_num_classes = checkpoint.get('num_classes')
+                saved_class_names = checkpoint.get('class_names')
+                saved_model_type = checkpoint.get('model_type', model_type)
